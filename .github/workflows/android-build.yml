@@ -27,7 +27,15 @@ jobs:
           cache: 'npm'
 
       # ---------------------------
-      # ✅ Android SDK is pre-installed on ubuntu-latest
+      # ⭐ FIX: Install Android SDK + build-tools
+      # ---------------------------
+      - name: 📱 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 📦 Install Android Build Tools 29.0.3
+        run: |
+          sdkmanager "build-tools;29.0.3"
+          sdkmanager --licenses
       # ---------------------------
 
       - name: 🔓 Decode .env file
@@ -41,8 +49,6 @@ jobs:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
           echo "$GOOGLE_SERVICES" | base64 --decode > google-services.json
-          ls -la google-services.json
-          cat google-services.json
 
       - name: 🔓 Decode Keystore File
         env:
@@ -66,48 +72,17 @@ jobs:
 
       - name: ✍️ Sign Release APK
         id: sign_app
-        run: |
-          # Find the latest build tools version
-          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
-          echo "Using Build Tools: $BUILD_TOOLS_VERSION"
-          
-          # Define paths
-          ANDROID_BUILD_TOOLS="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION"
-          ZIPALIGN="$ANDROID_BUILD_TOOLS/zipalign"
-          APKSIGNER="$ANDROID_BUILD_TOOLS/apksigner"
-          
-          # Debug: List files to see what was built
-          echo "Listing build outputs:"
-          ls -R android/app/build/outputs/apk/
-          
-          # Find the APK (ignoring signed ones if any exist)
-          INPUT_APK=$(find android/app/build/outputs/apk/release -name "*.apk" ! -name "*-signed.apk" | head -n 1)
-          
-          if [ -z "$INPUT_APK" ]; then
-            echo "Error: No APK found!"
-            exit 1
-          fi
-          
-          echo "Found APK: $INPUT_APK"
-          SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
-          
-          # Zipalign
-          echo "Aligning APK..."
-          "$ZIPALIGN" -v -p 4 "$INPUT_APK" "$SIGNED_APK"
-          
-          # Sign
-          echo "Signing APK..."
-          "$APKSIGNER" sign --ks release.keystore \
-            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
-            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
-            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
-            "$SIGNED_APK"
-            
-          echo "signedReleaseFile=$SIGNED_APK" >> $GITHUB_OUTPUT
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: 📤 Upload Signed Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: Bharat-MoodBoard-Release
-          path: android/app/build/outputs/apk/release/app-release-signed.apk
+          name: app-release-signed
+          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
           retention-days: 5
