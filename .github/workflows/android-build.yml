@@ -66,18 +66,36 @@ jobs:
 
       - name: ✍️ Sign Release APK
         id: sign_app
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: android/app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 34.0.0
+        run: |
+          # Find the latest build tools version
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
+          echo "Using Build Tools: $BUILD_TOOLS_VERSION"
+          
+          # Define paths
+          ANDROID_BUILD_TOOLS="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION"
+          ZIPALIGN="$ANDROID_BUILD_TOOLS/zipalign"
+          APKSIGNER="$ANDROID_BUILD_TOOLS/apksigner"
+          
+          INPUT_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
+          
+          # Zipalign
+          echo "Aligning APK..."
+          "$ZIPALIGN" -v -p 4 "$INPUT_APK" "$SIGNED_APK"
+          
+          # Sign
+          echo "Signing APK..."
+          "$APKSIGNER" sign --ks release.keystore \
+            --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+            --ks-pass pass:"${{ secrets.KEYSTORE_PASSWORD }}" \
+            --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
+            "$SIGNED_APK"
+            
+          echo "signedReleaseFile=$SIGNED_APK" >> $GITHUB_OUTPUT
 
       - name: 📤 Upload Signed Release APK
         uses: actions/upload-artifact@v4
         with:
           name: Bharat-MoodBoard-Release
-          path: ${{ steps.sign_app.outputs.signedReleaseFile }}
+          path: android/app/build/outputs/apk/release/app-release-signed.apk
           retention-days: 5
