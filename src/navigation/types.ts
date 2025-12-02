@@ -1,0 +1,23 @@
+export type RootStackParamList = {
+    Home: undefined;
+    HomeScreen: undefined;
+    PostMood: undefined;
+    Circles: undefined;
+    MoodCircles: undefined;
+    Profile: undefined;
+    PublicProfile: { userId: string };
+    Notifications: undefined;
+    Search: undefined;
+    CreateCommunity: undefined;
+    CommunityDetail: { communityId: string };
+    CommunityMembers: { communityId: string; communityName: string };
+    InviteUsers: { communityId: string; communityName: string };
+    Onboarding: undefined;
+    Login: undefined;
+    UsernameInput: undefined;
+    MainTabs: undefined;
+    CircleDetail: { circleId: string };
+    Friends: undefined;
+    UserPosts: { userId: string };
+    Settings: undefined;
+};
