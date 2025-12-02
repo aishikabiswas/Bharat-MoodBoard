@@ -27,15 +27,7 @@ jobs:
           cache: 'npm'
 
       # ---------------------------
-      # ⭐ FIX: Install Android SDK + build-tools
-      # ---------------------------
-      - name: 📱 Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: 📦 Install Android Build Tools 29.0.3
-        run: |
-          sdkmanager "build-tools;29.0.3"
-          sdkmanager --licenses
+      # ✅ Android SDK is pre-installed on ubuntu-latest
       # ---------------------------
 
       - name: 🔓 Decode .env file
