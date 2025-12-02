@@ -76,7 +76,19 @@ jobs:
           ZIPALIGN="$ANDROID_BUILD_TOOLS/zipalign"
           APKSIGNER="$ANDROID_BUILD_TOOLS/apksigner"
           
-          INPUT_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+          # Debug: List files to see what was built
+          echo "Listing build outputs:"
+          ls -R android/app/build/outputs/apk/
+          
+          # Find the APK (ignoring signed ones if any exist)
+          INPUT_APK=$(find android/app/build/outputs/apk/release -name "*.apk" ! -name "*-signed.apk" | head -n 1)
+          
+          if [ -z "$INPUT_APK" ]; then
+            echo "Error: No APK found!"
+            exit 1
+          fi
+          
+          echo "Found APK: $INPUT_APK"
           SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
           
           # Zipalign
