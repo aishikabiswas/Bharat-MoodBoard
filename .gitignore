@@ -47,3 +47,5 @@ google-services.json
 git-secret/*
 *.txt
 .keystore
+
+android/app/signingKey.jks
