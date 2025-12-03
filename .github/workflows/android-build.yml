@@ -40,7 +40,7 @@ jobs:
       # ---------------------------
       # Decode secrets
       # ---------------------------
-      - name: 🔓 Decode .env file
+            - name: 🔓 Decode .env file
         env:
           ENV_FILE: ${{ secrets.ENV_FILE_BASE64 }}
         run: |
@@ -50,9 +50,8 @@ jobs:
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
         run: |
-          mkdir -p android/app
-          echo "$GOOGLE_SERVICES" | base64 --decode > android/app/google-services.json
-
+          echo "$GOOGLE_SERVICES" | base64 --decode > google-services.json
+          
       # ---------------------------
       # Install & Build
       # ---------------------------
