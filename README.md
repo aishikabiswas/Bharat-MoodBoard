@@ -132,4 +132,4 @@ src/
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the Apache License, Version 2.0. See `LICENSE` for more information.
