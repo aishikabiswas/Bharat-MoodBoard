@@ -64,7 +64,7 @@
 <div style="display: flex; flex-direction: row; gap: 10px; overflow-x: auto; padding-bottom: 20px;">
    <img src="./screenshots/profile.jpg" alt="User Profile" width="200" />
    <img src="./screenshots/friends.jpg" alt="Friends List" width="200" />
-   <img src="./screenshots/search.jpg" alt="Search" width="200" />
+   <img src="./screenshots/settings.jpg" alt="Search" width="200" />
 </div>
 
 ## 🏁 Getting Started
